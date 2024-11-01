@@ -1,5 +1,7 @@
 # tjwmd
 
+![PyPI - Version](https://img.shields.io/pypi/v/tjwmd)
+
 ## Installation
 
 ```shell
@@ -9,35 +11,31 @@ pip install tjwmd
 ## Quick Start
 
 ```python
-import cv2
+from PIL import Image
+
 from tjwmd import TJWMD
-from ultralytics import YOLO
+from tjwmd.digits_labels import DigitsLabels
 
-image = cv2.imread('image.jpg')
+dl = DigitsLabels()
+dl[0] = ['0', 'Zero']
 
-wmc = YOLO(
-    'wmc_model.pt'
-)
-wmd = YOLO(
-    'wmd_model.pt'
-)
-tjwmd = TJWMD(
-    wmc,
-    wmc.names.values(),
-    wmd
+wmd = TJWMD(
+    wm_counter_model_path='yolov8_wmc_v1.pt',
+    wm_digits_model_path='yolov8_wmd_v3s.pt',
+    digits_labels=dl,
+    counter_labels=['counter']
 )
 
-r = tjwmd.predict(
-    frame_=image,
+img = Image.open('6724502e2cec9d702006b6cc.jpeg')
+
+values, bbox_img = wmd.predict(
+    _image=img,
     num_of_digits=6,
-    angle=0,
-    wm_counter_conf=0.4,
-    wm_digits_conf=0.1
+    wm_digits_conf=0.1,
+    wm_counter_conf=0.1,
+    angle=0.0
 )
+print(values)
 
-if r:
-    results, result_img = r
-    print(result_img)
-    cv2.imwrite('result.jpg', result_img)
-
+bbox_img.show()
 ```
